@@ -65,10 +65,16 @@
 /*
  * SERIAL driver system settings.
  */
-#define LPC17xx_SERIAL_USE_UART0            FALSE
+#define LPC17xx_SERIAL_USE_UART0            TRUE
+#define LPC17xx_SERIAL_USE_UART1            FALSE
+#define LPC17xx_SERIAL_USE_UART2            FALSE
+#define LPC17xx_SERIAL_USE_UART3            FALSE
 #define LPC17xx_SERIAL_FIFO_PRELOAD         16
 #define LPC17xx_SERIAL_UART0CLKDIV          1
 #define LPC17xx_SERIAL_UART0_IRQ_PRIORITY   3
+#define LPC17xx_SERIAL_UART1_IRQ_PRIORITY   3
+#define LPC17xx_SERIAL_UART2_IRQ_PRIORITY   3
+#define LPC17xx_SERIAL_UART3_IRQ_PRIORITY   3
 
 /*
  * SPI driver system settings.

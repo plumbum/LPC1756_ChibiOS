@@ -23,6 +23,9 @@
 #include <ch.h>
 #include <hal.h>
 
+#include <chprintf.h>
+
+
 static WORKING_AREA(led1_thread_wa, 128);
 static msg_t led1_thread(void *p)
 {
@@ -30,7 +33,7 @@ static msg_t led1_thread(void *p)
 
     while(TRUE)
     {
-        LPC_GPIO1->FIOSET = (1<<18);
+        palSetPad(GPIO1, 18);
         chThdSleepMilliseconds(500);
     }
     return 0;
@@ -43,7 +46,7 @@ static msg_t led2_thread(void *p)
 
     while(TRUE)
     {
-        LPC_GPIO1->FIOCLR = (1<<18);
+        palClearPad(GPIO1, 18);
         chThdSleepMilliseconds(400);
     }
     return 0;
@@ -53,29 +56,33 @@ static msg_t led2_thread(void *p)
  * Application entry point.
  */
 int main(void) {
-  /*
-   * System initializations.
-   * - HAL initialization, this also initializes the configured device drivers
-   *   and performs the board-specific initializations.
-   * - Kernel initialization, the main() function becomes a thread and the
-   *   RTOS is active.
-   */
-  halInit();
-  chSysInit();
+    /*
+     * System initializations.
+     * - HAL initialization, this also initializes the configured device drivers
+     *   and performs the board-specific initializations.
+     * - Kernel initialization, the main() function becomes a thread and the
+     *   RTOS is active.
+     */
+    halInit();
+    chSysInit();
 
-  LPC_GPIO1->FIOSET = (1<<18);
-  LPC_GPIO1->FIODIR = (1<<18);
+    sdStart(&SD1, NULL);
+    chprintf(&SD1, "Build date " __DATE__ " " __TIME__ "\n");
 
-  chThdCreateStatic(led1_thread_wa, sizeof(led1_thread_wa),
-                    NORMALPRIO + 1, led1_thread, NULL);
-  chThdCreateStatic(led2_thread_wa, sizeof(led2_thread_wa),
-                    NORMALPRIO + 1, led2_thread, NULL);
+    chThdCreateStatic(led1_thread_wa, sizeof(led1_thread_wa),
+                      NORMALPRIO + 1, led1_thread, NULL);
+    chThdCreateStatic(led2_thread_wa, sizeof(led2_thread_wa),
+                      NORMALPRIO + 1, led2_thread, NULL);
 
-  /*
-   * Normal main() thread activity, nothing in this test.
-   */
-  while (TRUE) {
-    chThdSleepMilliseconds(500);
-  }
-  return 0;
+    /*
+     * Normal main() thread activity, nothing in this test.
+     */
+    int cnt = 0;
+    while (TRUE)
+    {
+        chprintf(&SD1, "Count %d\n", cnt);
+        cnt++;
+        chThdSleepMilliseconds(1000);
+    }
+    return 0;
 }

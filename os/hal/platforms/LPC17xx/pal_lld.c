@@ -60,14 +60,16 @@
  */
 void _pal_lld_init(const PALConfig *config) {
 
-  LPC_GPIO0->DIR = config->P0.dir;
-  LPC_GPIO1->DIR = config->P1.dir;
-  LPC_GPIO2->DIR = config->P2.dir;
-  LPC_GPIO3->DIR = config->P3.dir;
-  LPC_GPIO0->DATA = config->P0.data;
-  LPC_GPIO1->DATA = config->P1.data;
-  LPC_GPIO2->DATA = config->P2.data;
-  LPC_GPIO3->DATA = config->P3.data;
+  LPC_GPIO0->FIOPIN = config->P0.data;
+  LPC_GPIO1->FIOPIN = config->P1.data;
+  LPC_GPIO2->FIOPIN = config->P2.data;
+  LPC_GPIO3->FIOPIN = config->P3.data;
+  LPC_GPIO4->FIOPIN = config->P4.data;
+  LPC_GPIO0->FIODIR = config->P0.dir;
+  LPC_GPIO1->FIODIR = config->P1.dir;
+  LPC_GPIO2->FIODIR = config->P2.dir;
+  LPC_GPIO3->FIODIR = config->P3.dir;
+  LPC_GPIO4->FIODIR = config->P4.dir;
 }
 
 /**
@@ -92,12 +94,12 @@ void _pal_lld_setgroupmode(ioportid_t port,
   switch (mode) {
   case PAL_MODE_RESET:
   case PAL_MODE_INPUT:
-    port->DIR &= ~mask;
+    port->FIODIR &= ~mask;
     break;
   case PAL_MODE_UNCONNECTED:
     palSetPort(port, PAL_WHOLE_PORT);
   case PAL_MODE_OUTPUT_PUSHPULL:
-    port->DIR |=  mask;
+    port->FIODIR |=  mask;
     break;
   }
 }

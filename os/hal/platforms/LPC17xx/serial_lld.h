@@ -19,8 +19,8 @@
 */
 
 /**
- * @file    LPC13xx/serial_lld.h
- * @brief   LPC13xx low level serial driver header.
+ * @file    LPC17xx/serial_lld.h
+ * @brief   LPC17xx low level serial driver header.
  *
  * @addtogroup SERIAL
  * @{
@@ -89,8 +89,35 @@
  * @details If set to @p TRUE the support for UART0 is included.
  * @note    The default is @p TRUE .
  */
-#if !defined(LPC13xx_SERIAL_USE_UART0) || defined(__DOXYGEN__)
-#define LPC13xx_SERIAL_USE_UART0            TRUE
+#if !defined(LPC17xx_SERIAL_USE_UART0) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_USE_UART0            TRUE
+#endif
+
+/**
+ * @brief   UART1 driver enable switch.
+ * @details If set to @p TRUE the support for UART1 is included.
+ * @note    The default is @p TRUE .
+ */
+#if !defined(LPC17xx_SERIAL_USE_UART1) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_USE_UART1            FALSE
+#endif
+
+/**
+ * @brief   UART2 driver enable switch.
+ * @details If set to @p TRUE the support for UART2 is included.
+ * @note    The default is @p TRUE .
+ */
+#if !defined(LPC17xx_SERIAL_USE_UART2) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_USE_UART2            FALSE
+#endif
+
+/**
+ * @brief   UART3 driver enable switch.
+ * @details If set to @p TRUE the support for UART3 is included.
+ * @note    The default is @p TRUE .
+ */
+#if !defined(LPC17xx_SERIAL_USE_UART3) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_USE_UART3            FALSE
 #endif
 
 /**
@@ -102,48 +129,121 @@
  *          also increase the worst case interrupt response time because the
  *          preload loops.
  */
-#if !defined(LPC13xx_SERIAL_FIFO_PRELOAD) || defined(__DOXYGEN__)
-#define LPC13xx_SERIAL_FIFO_PRELOAD         16
+#if !defined(LPC17xx_SERIAL_FIFO_PRELOAD) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_FIFO_PRELOAD         16
 #endif
 
 /**
  * @brief   UART0 PCLK divider.
  */
-#if !defined(LPC13xx_SERIAL_UART0CLKDIV) || defined(__DOXYGEN__)
-#define LPC13xx_SERIAL_UART0CLKDIV          1
+#if !defined(LPC17xx_SERIAL_UART0CLKDIV) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART0CLKDIV          1
+#endif
+
+/**
+ * @brief   UART1 PCLK divider.
+ */
+#if !defined(LPC17xx_SERIAL_UART1CLKDIV) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART1CLKDIV          1
+#endif
+
+/**
+ * @brief   UART2 PCLK divider.
+ */
+#if !defined(LPC17xx_SERIAL_UART2CLKDIV) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART2CLKDIV          1
+#endif
+
+/**
+ * @brief   UART3 PCLK divider.
+ */
+#if !defined(LPC17xx_SERIAL_UART3CLKDIV) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART3CLKDIV          1
 #endif
 
 /**
  * @brief   UART0 interrupt priority level setting.
  */
-#if !defined(LPC13xx_SERIAL_UART0_IRQ_PRIORITY) || defined(__DOXYGEN__)
-#define LPC13xx_SERIAL_UART0_IRQ_PRIORITY   3
+#if !defined(LPC17xx_SERIAL_UART0_IRQ_PRIORITY) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART0_IRQ_PRIORITY   3
 #endif
+
+/**
+ * @brief   UART1 interrupt priority level setting.
+ */
+#if !defined(LPC17xx_SERIAL_UART1_IRQ_PRIORITY) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART1_IRQ_PRIORITY   7
+#endif
+
+/**
+ * @brief   UART2 interrupt priority level setting.
+ */
+#if !defined(LPC17xx_SERIAL_UART2_IRQ_PRIORITY) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART2_IRQ_PRIORITY   8
+#endif
+
+/**
+ * @brief   UART3 interrupt priority level setting.
+ */
+#if !defined(LPC17xx_SERIAL_UART3_IRQ_PRIORITY) || defined(__DOXYGEN__)
+#define LPC17xx_SERIAL_UART3_IRQ_PRIORITY   9
+#endif
+
 
 /*===========================================================================*/
 /* Derived constants and error checks.                                       */
 /*===========================================================================*/
 
-#if (LPC13xx_SERIAL_UART0CLKDIV < 1) || (LPC11xx_SERIAL_UART0CLKDIV > 255)
-#error "invalid LPC13xx_SERIAL_UART0CLKDIV setting"
+#if (LPC17xx_SERIAL_UART0CLKDIV < 1) || (LPC11xx_SERIAL_UART0CLKDIV > 255)
+#error "invalid LPC17xx_SERIAL_UART0CLKDIV setting"
 #endif
 
-#if (LPC13xx_SERIAL_FIFO_PRELOAD < 1) || (LPC13xx_SERIAL_FIFO_PRELOAD > 16)
-#error "invalid LPC13xx_SERIAL_FIFO_PRELOAD setting"
+#if (LPC17xx_SERIAL_UART1CLKDIV < 1) || (LPC11xx_SERIAL_UART1CLKDIV > 255)
+#error "invalid LPC17xx_SERIAL_UART1CLKDIV setting"
+#endif
+
+#if (LPC17xx_SERIAL_UART2CLKDIV < 1) || (LPC11xx_SERIAL_UART2CLKDIV > 255)
+#error "invalid LPC17xx_SERIAL_UART2CLKDIV setting"
+#endif
+
+#if (LPC17xx_SERIAL_UART3CLKDIV < 1) || (LPC11xx_SERIAL_UART3CLKDIV > 255)
+#error "invalid LPC17xx_SERIAL_UART3CLKDIV setting"
+#endif
+
+#if (LPC17xx_SERIAL_FIFO_PRELOAD < 1) || (LPC17xx_SERIAL_FIFO_PRELOAD > 16)
+#error "invalid LPC17xx_SERIAL_FIFO_PRELOAD setting"
 #endif
 
 /**
  * @brief   UART0 clock.
  */
-#define  LPC13xx_SERIAL_UART0_PCLK                                          \
-  (LPC13xx_MAINCLK / LPC13xx_SERIAL_UART0CLKDIV)
+#define  LPC17xx_SERIAL_UART0_PCLK                                          \
+  (LPC17xx_MAINCLK / LPC17xx_SERIAL_UART0CLKDIV)
+
+/**
+ * @brief   UART1 clock.
+ */
+#define  LPC17xx_SERIAL_UART1_PCLK                                          \
+  (LPC17xx_MAINCLK / LPC17xx_SERIAL_UART1CLKDIV)
+
+/**
+ * @brief   UART2 clock.
+ */
+#define  LPC17xx_SERIAL_UART2_PCLK                                          \
+  (LPC17xx_MAINCLK / LPC17xx_SERIAL_UART2CLKDIV)
+
+/**
+ * @brief   UART3 clock.
+ */
+#define  LPC17xx_SERIAL_UART3_PCLK                                          \
+  (LPC17xx_MAINCLK / LPC17xx_SERIAL_UART3CLKDIV)
 
 /*===========================================================================*/
 /* Driver data structures and types.                                         */
 /*===========================================================================*/
 
 /**
- * @brief   LPC13xx Serial Driver configuration structure.
+ * @brief   LPC17xx Serial Driver configuration structure.
  * @details An instance of this structure must be passed to @p sdStart()
  *          in order to configure and start a serial driver operations.
  */
@@ -189,8 +289,20 @@ typedef struct {
 /* External declarations.                                                    */
 /*===========================================================================*/
 
-#if LPC13xx_SERIAL_USE_UART0 && !defined(__DOXYGEN__)
+#if LPC17xx_SERIAL_USE_UART0 && !defined(__DOXYGEN__)
 extern SerialDriver SD1;
+#endif
+
+#if LPC17xx_SERIAL_USE_UART1 && !defined(__DOXYGEN__)
+extern SerialDriver SD2;
+#endif
+
+#if LPC17xx_SERIAL_USE_UART2 && !defined(__DOXYGEN__)
+extern SerialDriver SD3;
+#endif
+
+#if LPC17xx_SERIAL_USE_UART3 && !defined(__DOXYGEN__)
+extern SerialDriver SD4;
 #endif
 
 #ifdef __cplusplus

@@ -19,8 +19,8 @@
 */
 
 /**
- * @file    LPC13xx/serial_lld.c
- * @brief   LPC13xx low level serial driver code.
+ * @file    LPC17xx/serial_lld.c
+ * @brief   LPC17xx low level serial driver code.
  *
  * @addtogroup SERIAL
  * @{
@@ -35,9 +35,24 @@
 /* Driver exported variables.                                                */
 /*===========================================================================*/
 
-#if LPC13xx_SERIAL_USE_UART0 || defined(__DOXYGEN__)
+#if LPC17xx_SERIAL_USE_UART0 || defined(__DOXYGEN__)
 /** @brief UART0 serial driver identifier.*/
 SerialDriver SD1;
+#endif
+
+#if LPC17xx_SERIAL_USE_UART1 || defined(__DOXYGEN__)
+/** @brief UART1 serial driver identifier.*/
+SerialDriver SD2;
+#endif
+
+#if LPC17xx_SERIAL_USE_UART2 || defined(__DOXYGEN__)
+/** @brief UART2 serial driver identifier.*/
+SerialDriver SD3;
+#endif
+
+#if LPC17xx_SERIAL_USE_UART3 || defined(__DOXYGEN__)
+/** @brief UART3 serial driver identifier.*/
+SerialDriver SD4;
 #endif
 
 /*===========================================================================*/
@@ -64,7 +79,7 @@ static const SerialConfig default_config = {
 static void uart_init(SerialDriver *sdp, const SerialConfig *config) {
   LPC_UART_TypeDef *u = sdp->uart;
 
-  uint32_t div = LPC13xx_SERIAL_UART0_PCLK / (config->sc_speed << 4);
+  uint32_t div = LPC17xx_SERIAL_UART0_PCLK / (config->sc_speed << 4);
   u->LCR = config->sc_lcr | LCR_DLAB;
   u->DLL = div;
   u->DLM = div >> 8;
@@ -150,7 +165,7 @@ static void serve_interrupt(SerialDriver *sdp) {
       break;
     case IIR_SRC_TX:
       {
-        int i = LPC13xx_SERIAL_FIFO_PRELOAD;
+        int i = LPC17xx_SERIAL_FIFO_PRELOAD;
         do {
           msg_t b;
 
@@ -182,7 +197,7 @@ static void preload(SerialDriver *sdp) {
   LPC_UART_TypeDef *u = sdp->uart;
 
   if (u->LSR & LSR_THRE) {
-    int i = LPC13xx_SERIAL_FIFO_PRELOAD;
+    int i = LPC17xx_SERIAL_FIFO_PRELOAD;
     do {
       msg_t b = chOQGetI(&sdp->oqueue);
       if (b < Q_OK) {
@@ -198,7 +213,7 @@ static void preload(SerialDriver *sdp) {
 /**
  * @brief   Driver SD1 output notification.
  */
-#if LPC13xx_SERIAL_USE_UART0 || defined(__DOXYGEN__)
+#if LPC17xx_SERIAL_USE_UART0 || defined(__DOXYGEN__)
 static void notify1(GenericQueue *qp) {
 
   (void)qp;
@@ -215,8 +230,8 @@ static void notify1(GenericQueue *qp) {
  *
  * @isr
  */
-#if LPC13xx_SERIAL_USE_UART0 || defined(__DOXYGEN__)
-CH_IRQ_HANDLER(VectorF8) {
+#if LPC17xx_SERIAL_USE_UART0 || defined(__DOXYGEN__)
+CH_IRQ_HANDLER(Vector54) {
 
   CH_IRQ_PROLOGUE();
 
@@ -237,12 +252,14 @@ CH_IRQ_HANDLER(VectorF8) {
  */
 void sd_lld_init(void) {
 
-#if LPC13xx_SERIAL_USE_UART0
+#if LPC17xx_SERIAL_USE_UART0
   sdObjectInit(&SD1, NULL, notify1);
-  SD1.uart = LPC_UART;
-  LPC_IOCON->PIO1_6 = 0xC1;                 /* RDX without resistors.       */
-  LPC_IOCON->PIO1_7 = 0xC1;                 /* TDX without resistors.       */
+  SD1.uart = LPC_UART0;
+  /* RDX without resistors.       */
+  /* TDX without resistors.       */
+  LPC_PINCON->PINSEL0 |= (1<<4) | (1<<6);
 #endif
+  // TODO UART1, UART2, UART3
 }
 
 /**
@@ -261,14 +278,26 @@ void sd_lld_start(SerialDriver *sdp, const SerialConfig *config) {
     config = &default_config;
 
   if (sdp->state == SD_STOP) {
-#if LPC13xx_SERIAL_USE_UART0
+#if LPC17xx_SERIAL_USE_UART0
     if (&SD1 == sdp) {
+      uint32_t d;
+      switch(LPC17xx_SERIAL_UART0CLKDIV)
+      {
+          default: d = 1; break;
+          case 2: d = 2; break;
+          case 4: d = 0; break;
+          case 8: d = 3; break;
+      }
+      LPC_SC->PCLKSEL0 = (LPC_SC->PCLKSEL0 & ~(3<<6)) | (d<<6);
+      /*
       LPC_SYSCON->SYSAHBCLKCTRL |= (1 << 12);
-      LPC_SYSCON->UARTCLKDIV = LPC13xx_SERIAL_UART0CLKDIV;
-      NVICEnableVector(UART_IRQn,
-                       CORTEX_PRIORITY_MASK(LPC13xx_SERIAL_UART0_IRQ_PRIORITY));
+      LPC_SYSCON->UARTCLKDIV = LPC17xx_SERIAL_UART0CLKDIV;
+      */
+      NVICEnableVector(UART0_IRQn,
+                       CORTEX_PRIORITY_MASK(LPC17xx_SERIAL_UART0_IRQ_PRIORITY));
     }
 #endif
+    // TODO UART1, UART2, UART3
   }
   uart_init(sdp, config);
 }
@@ -286,14 +315,18 @@ void sd_lld_stop(SerialDriver *sdp) {
 
   if (sdp->state == SD_READY) {
     uart_deinit(sdp->uart);
-#if LPC13xx_SERIAL_USE_UART0
+#if LPC17xx_SERIAL_USE_UART0
     if (&SD1 == sdp) {
+      // LPC_SC->PCLKSEL0 = (LPC_SC->PCLKSEL0 & ~(1<<6)) & (LPC17xx_SERIAL_UART0CLKDIV<<6);
+      /*
       LPC_SYSCON->UARTCLKDIV = 0;
       LPC_SYSCON->SYSAHBCLKCTRL &= ~(1 << 12);
-      NVICDisableVector(UART_IRQn);
+      */
+      NVICDisableVector(UART0_IRQn);
       return;
     }
 #endif
+    // TODO UART1, UART2, UART3
   }
 }
 

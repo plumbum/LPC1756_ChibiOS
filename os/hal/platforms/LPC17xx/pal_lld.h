@@ -19,8 +19,8 @@
 */
 
 /**
- * @file    LPC13xx/pal_lld.h
- * @brief   LPC13xx GPIO low level driver header.
+ * @file    lpc17xx/pal_lld.h
+ * @brief   lpc17xx GPIO low level driver header.
  *
  * @addtogroup PAL
  * @{
@@ -52,7 +52,7 @@ typedef struct {
   uint32_t      data;
   /** Initial value for FIO_DIR register.*/
   uint32_t      dir;
-} lpc13xx_gpio_setup_t;
+} lpc17xx_gpio_setup_t;
 
 /**
  * @brief   GPIO static initializer.
@@ -68,13 +68,15 @@ typedef struct {
  */
 typedef struct {
   /** @brief GPIO 0 setup data.*/
-  lpc13xx_gpio_setup_t   P0;
+  lpc17xx_gpio_setup_t   P0;
   /** @brief GPIO 1 setup data.*/
-  lpc13xx_gpio_setup_t   P1;
+  lpc17xx_gpio_setup_t   P1;
   /** @brief GPIO 2 setup data.*/
-  lpc13xx_gpio_setup_t   P2;
+  lpc17xx_gpio_setup_t   P2;
   /** @brief GPIO 3 setup data.*/
-  lpc13xx_gpio_setup_t   P3;
+  lpc17xx_gpio_setup_t   P3;
+  /** @brief GPIO 4 setup data.*/
+  lpc17xx_gpio_setup_t   P4;
 } PALConfig;
 
 /**
@@ -131,6 +133,12 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
 #define IOPORT4         LPC_GPIO3
 #define GPIO3           LPC_GPIO3
 
+/**
+ * @brief   GPIO4 port identifier.
+ */
+#define IOPORT5         LPC_GPIO4
+#define GPIO4           LPC_GPIO4
+
 /*===========================================================================*/
 /* Implementation, some of the following macros could be implemented as      */
 /* functions, if so please put them in pal_lld.c.                            */
@@ -155,7 +163,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  *
  * @notapi
  */
-#define pal_lld_readport(port) ((port)->DATA)
+#define pal_lld_readport(port) ((port)->FIOPIN)
 
 /**
  * @brief   Reads the output latch.
@@ -169,7 +177,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  *
  * @notapi
  */
-#define pal_lld_readlatch(port) ((port)->DATA)
+#define pal_lld_readlatch(port) ((port)->FIOPIN)
 
 /**
  * @brief   Writes a bits mask on a I/O port.
@@ -181,7 +189,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  *
  * @notapi
  */
-#define pal_lld_writeport(port, bits) ((port)->DATA = (bits))
+#define pal_lld_writeport(port, bits) ((port)->FIOPIN = (bits))
 
 /**
  * @brief   Sets a bits mask on a I/O port.
@@ -196,7 +204,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  *
  * @notapi
  */
-#define pal_lld_setport(port, bits) ((port)->MASKED_ACCESS[bits] = 0xFFFFFFFF)
+#define pal_lld_setport(port, bits) ((port)->FIOSET = (bits))
 
 /**
  * @brief   Clears a bits mask on a I/O port.
@@ -211,7 +219,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  *
  * @notapi
  */
-#define pal_lld_clearport(port, bits) ((port)->MASKED_ACCESS[bits] = 0)
+#define pal_lld_clearport(port, bits) ((port)->FIOCLR = (bits))
 
 /**
  * @brief   Reads a group of bits.
@@ -248,7 +256,8 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  * @notapi
  */
 #define pal_lld_writegroup(port, mask, offset, bits)                        \
-  ((port)->MASKED_ACCESS[(mask) << (offset)] = (bits))
+  palWritePort(port, (palReadLatch(port) & ~((mask) << (offset))) |     \
+                     (((bits) & (mask)) << (offset)))
 
 /**
  * @brief   Pads group mode setup.
@@ -283,7 +292,12 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  * @notapi
  */
 #define pal_lld_writepad(port, pad, bit)                                    \
-  ((port)->MASKED_ACCESS[(mask) << (pad)] = (bit) << (pad))
+    do { \
+        if(bit != PAL_LOW) \
+          ((port)->FIOSET = 1 << (pad)); \
+        else \
+          ((port)->FIOCLR = 1 << (pad)); \
+    } while(0)
 
 /**
  * @brief   Sets a pad logical state to @p PAL_HIGH.
@@ -299,7 +313,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  * @notapi
  */
 #define pal_lld_setpad(port, pad)                                           \
-  ((port)->MASKED_ACCESS[1 << (pad)] = 1 << (pad))
+  ((port)->FIOSET = 1 << (pad))
 
 /**
  * @brief   Clears a pad logical state to @p PAL_LOW.
@@ -315,7 +329,7 @@ typedef LPC_GPIO_TypeDef *ioportid_t;
  * @notapi
  */
 #define pal_lld_clearpad(port, pad)                                         \
-  ((port)->MASKED_ACCESS[1 << (pad)] = 0)
+  ((port)->FIOCLR = 1 << (pad))
 
 #if !defined(__DOXYGEN__)
 extern const PALConfig pal_default_config;
